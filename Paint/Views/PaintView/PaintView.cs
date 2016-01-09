@@ -24,5 +24,10 @@ namespace Paint.Views.PaintView
             get { return (float)GetValue(LineWidthProperty); }
             set { SetValue(LineWidthProperty, value); }
         }
+
+        public void Clear()
+        {
+            this.Source = null;
+        }
     }
 }
