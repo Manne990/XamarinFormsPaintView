@@ -84,6 +84,7 @@
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\PaintView\PaintViewRenderer.cs" />
+    <Compile Include="Extensions\CollectionExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -96,6 +97,7 @@
     <Folder Include="Resources\values\" />
     <Folder Include="Views\" />
     <Folder Include="Views\PaintView\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\icon.png" />
