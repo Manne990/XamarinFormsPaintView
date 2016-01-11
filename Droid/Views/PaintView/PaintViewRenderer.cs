@@ -4,6 +4,7 @@ using System.Linq;
 using Android.Graphics;
 using Android.Support.V4.View;
 using Android.Views;
+using Paint.Droid.Common;
 using Paint.Droid.Extensions;
 using Paint.Droid.Views.PaintView;
 using Paint.Views.PaintView;
@@ -23,6 +24,7 @@ namespace Paint.Droid.Views.PaintView
         private Android.Graphics.Paint _currentPaint;
         private Bitmap _bitmap;
         private Canvas _canvas;
+        private float _deviceDensity;
 
         #endregion
 
@@ -39,10 +41,12 @@ namespace Paint.Droid.Views.PaintView
                 _formsView = (Paint.Views.PaintView.PaintView)e.NewElement;
 
                 _currentPaint = new Android.Graphics.Paint();
-                _currentPaint.Dither = true;;
+                _currentPaint.Dither = true;
                 _currentPaint.SetStyle(Android.Graphics.Paint.Style.Stroke);
                 _currentPaint.StrokeJoin = Android.Graphics.Paint.Join.Round;
                 _currentPaint.StrokeCap = Android.Graphics.Paint.Cap.Round;
+
+                _deviceDensity = AndroidDevice.DisplayMetrics.Density > 1 ? AndroidDevice.DisplayMetrics.Density : 1;
             }
         }
 
@@ -61,7 +65,7 @@ namespace Paint.Droid.Views.PaintView
             {
                 // Set values from settings
                 _currentPaint.Color = _formsView.PaintColor.ToAndroid();
-                _currentPaint.StrokeWidth = _formsView.LineWidth * 2.0f;
+                _currentPaint.StrokeWidth = _formsView.LineWidth * _deviceDensity;
 
                 // Init storage for pointers and historical coords
                 _pointerIds = new List<int>();
