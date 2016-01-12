@@ -61,81 +61,18 @@ namespace Paint.Droid.Views.PaintView
 
         public override bool OnTouchEvent(Android.Views.MotionEvent e)
         {
-            //System.Diagnostics.Debug.WriteLine("{0}, {1}", (MotionEventActions)e.Action, e.PointerCount);
-
             if(e.Action == MotionEventActions.Down || 
                 e.Action == MotionEventActions.PointerDown || 
                 e.Action == MotionEventActions.Pointer1Down || 
                 e.Action == MotionEventActions.Pointer2Down || 
                 e.Action == MotionEventActions.Pointer3Down)
             {
-                // Set values from settings
-                _currentPaint.Color = _formsView.PaintColor.ToAndroid();
-                _currentPaint.StrokeWidth = _formsView.LineWidth * _deviceDensity;
-
-                // Init storage for pointers and historical coords
-                _pointerIds = new List<int>();
-                _lastPointers = new List<PaintPointer>();
-
-                // Loop all pointers
-                for(int i = 0; i < e.PointerCount; i++)
-                {
-                    // Get and store the pointer
-                    var pointerId = e.GetPointerId(i);
-
-                    // Get the pointer coords
-                    _pointerIds.Add(pointerId);
-
-                    int pointerIndex = e.FindPointerIndex(pointerId);
-
-                    var currentPoint = new MotionEvent.PointerCoords();
-
-                    e.GetPointerCoords(pointerIndex, currentPoint);
-
-                    // Store the coord in the historical list
-                    _lastPointers.Add(new PaintPointer() { PointerId = pointerId, Coords = currentPoint });
-
-                    // Draw the line
-                    DrawLine(currentPoint, currentPoint);
-                }
+                HandleTouchDown(e);
             }
 
             if(e.Action == MotionEventActions.Move)
             {
-                // Clone the historical coords
-                var lastPointers = _lastPointers.Clone();
-
-                // Reset the historical coords
-                _lastPointers = new List<PaintPointer>();
-
-                // Loop all pointers
-                foreach(var pointerId in _pointerIds)
-                {
-                    // Get the pointer coords
-                    int pointerIndex = e.FindPointerIndex(pointerId);
-
-                    if(pointerIndex == -1)
-                    {
-                        continue;
-                    }
-
-                    var currentPoint = new MotionEvent.PointerCoords();
-                    e.GetPointerCoords(pointerIndex, currentPoint);
-
-                    // Get the last (historical) pointer coords
-                    var lastPoint = lastPointers.FirstOrDefault(l => l.PointerId == pointerId).Coords;
-
-                    if(lastPoint == null)
-                    {
-                        lastPoint = currentPoint;
-                    }
-
-                    // Store the coord in the historical list
-                    _lastPointers.Add(new PaintPointer() { PointerId = pointerId, Coords = currentPoint });
-
-                    // Draw the line
-                    DrawLine(lastPoint, currentPoint);
-                }
+                HandleTouchMove(e);
             }
 
             return true;
@@ -147,10 +84,89 @@ namespace Paint.Droid.Views.PaintView
 
         #region Private Methods
 
+        private void HandleTouchDown(Android.Views.MotionEvent e)
+        {
+            // Set values from settings
+            _currentPaint.Color = _formsView.PaintColor.ToAndroid();
+            _currentPaint.StrokeWidth = _formsView.LineWidth * _deviceDensity;
+
+            // Init storage for pointers and historical coords
+            _pointerIds = new List<int>();
+            _lastPointers = new List<PaintPointer>();
+
+            // Loop all pointers
+            for(int i = 0; i < e.PointerCount; i++)
+            {
+                // Get and store the pointer
+                var pointerId = e.GetPointerId(i);
+
+                _pointerIds.Add(pointerId);
+
+                // Get the pointer coords
+                var currentPoint = GetPointerCoords(e, pointerId);
+
+                // Store the coord in the historical list
+                _lastPointers.Add(new PaintPointer() { PointerId = pointerId, Coords = currentPoint });
+
+                // Draw the line
+                DrawLine(currentPoint, currentPoint);
+            }
+        }
+
+        private void HandleTouchMove(Android.Views.MotionEvent e)
+        {
+            // Clone the historical coords
+            var lastPointers = _lastPointers.Clone();
+
+            // Reset the historical coords
+            _lastPointers = new List<PaintPointer>();
+
+            // Loop all pointers
+            foreach(var pointerId in _pointerIds)
+            {
+                // Get the pointer coords
+                var currentPoint = GetPointerCoords(e, pointerId);
+
+                if(currentPoint == null)
+                {
+                    continue;
+                }
+
+                // Get the last (historical) pointer coords
+                var lastPoint = lastPointers.FirstOrDefault(l => l.PointerId == pointerId).Coords;
+
+                if(lastPoint == null)
+                {
+                    lastPoint = currentPoint;
+                }
+
+                // Store the coord in the historical list
+                _lastPointers.Add(new PaintPointer() { PointerId = pointerId, Coords = currentPoint });
+
+                // Draw the line
+                DrawLine(lastPoint, currentPoint);
+            }
+        }
+
+        private MotionEvent.PointerCoords GetPointerCoords(Android.Views.MotionEvent e, int pointerId)
+        {
+            // Get the pointer coords
+            var pointerIndex = e.FindPointerIndex(pointerId);
+
+            if(pointerIndex < 0)
+            {
+                return null;
+            }
+
+            var point = new MotionEvent.PointerCoords();
+
+            e.GetPointerCoords(pointerIndex, point);
+
+            return point;
+        }
+
         private void DrawLine(MotionEvent.PointerCoords point1, MotionEvent.PointerCoords point2)
         {
-            //System.Diagnostics.Debug.WriteLine("{0}, {1}", point1.X, point1.Y);
-
             // Draw the line
             _canvas.DrawLine(point1.X - 0.5f, point1.Y - 0.5f, point2.X, point2.Y, _currentPaint);
 
