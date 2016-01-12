@@ -61,7 +61,13 @@ namespace Paint.Droid.Views.PaintView
 
         public override bool OnTouchEvent(Android.Views.MotionEvent e)
         {
-            if(e.Action == MotionEventActions.Down)
+            //System.Diagnostics.Debug.WriteLine("{0}, {1}", (MotionEventActions)e.Action, e.PointerCount);
+
+            if(e.Action == MotionEventActions.Down || 
+                e.Action == MotionEventActions.PointerDown || 
+                e.Action == MotionEventActions.Pointer1Down || 
+                e.Action == MotionEventActions.Pointer2Down || 
+                e.Action == MotionEventActions.Pointer3Down)
             {
                 // Set values from settings
                 _currentPaint.Color = _formsView.PaintColor.ToAndroid();
@@ -108,6 +114,11 @@ namespace Paint.Droid.Views.PaintView
                     // Get the pointer coords
                     int pointerIndex = e.FindPointerIndex(pointerId);
 
+                    if(pointerIndex == -1)
+                    {
+                        continue;
+                    }
+
                     var currentPoint = new MotionEvent.PointerCoords();
                     e.GetPointerCoords(pointerIndex, currentPoint);
 
@@ -138,6 +149,8 @@ namespace Paint.Droid.Views.PaintView
 
         private void DrawLine(MotionEvent.PointerCoords point1, MotionEvent.PointerCoords point2)
         {
+            //System.Diagnostics.Debug.WriteLine("{0}, {1}", point1.X, point1.Y);
+
             // Draw the line
             _canvas.DrawLine(point1.X - 0.5f, point1.Y - 0.5f, point2.X, point2.Y, _currentPaint);
 
