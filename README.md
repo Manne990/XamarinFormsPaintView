@@ -1,4 +1,4 @@
-# XamarinFormsPaintView
+# Xamarin Forms - PaintView
 Custom Xamarin Forms view for painting with multi touch
 
 Features drawing with multi touch, select color and select line width.
